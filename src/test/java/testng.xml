@@ -1,0 +1,30 @@
+<suite name="TurretControlTests" verbose="1">
+  
+    <test name="Magazine">
+    <classes>
+      <class name="test.java.turretcontrol.magazine.MagazineTest"/>
+    </classes>
+  </test>
+  
+  <test name="TurretControl">
+    <classes>
+      <class name="test.java.turretcontrol.TurretControlTest"/>
+    </classes>
+  </test>
+  
+  
+  <test name="G36FireControl">
+    <classes>
+      <class name="test.java.turretcontrol.firecontrol.G36GPIOFireControlTest"/>
+    </classes>
+  </test>
+  
+  
+  <test name="CS18FireControl">
+    <classes>
+      <class name="test.java.turretcontrol.firecontrol.CS18GPIOFireControlTest"/>
+    </classes>
+  </test>
+  
+
+</suite>

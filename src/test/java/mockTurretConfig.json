@@ -1,0 +1,60 @@
+{
+	"turret": {
+		"username": "jason",
+		"barrelExitSensorGPIOPin": 9,
+		"tempSensor": {
+			"bus": 1,
+			"address": "0x77"
+		},
+		"name": "Turret 1",
+		"type": "MockFireControl",
+		"magazine": {
+			"name": "G36Standard",
+			"capacity": 30
+		},
+		"panning": {
+			"hat_address": "0x60",
+			"hat_freq": 1600,
+			"motors": {
+				"motor_x": {
+					"port": 0,
+					"speed": 30,
+					"state_file": "motor_x.json",
+					"min": 0,
+					"max": 200
+				},
+				"motor_y": {
+					"port": 1,
+					"speed": 30,
+					"state_file": "motor_y.json",
+					"min": 0,
+					"max": 200
+				}
+			}
+		},
+		"movement": {},
+		"desc": "Mock Fire Control",
+
+		"rated_specs": {
+			"barrel_max_rounds": 2000,
+			"barrel_max_temp": 50,
+			"clean_max_rounds": 400,
+			"min_velocity": 100
+		},
+		"firecontrol": {
+			"name": "MockFireControl",
+			"distance_to_exit_sensor": 30,
+			"min_round_velocity": 300,
+			"cycle_len": 1000,
+			"trigger_duration": 500,
+			"trigger_GPIO_pin": 10,
+			"burstfire": false
+		}
+	},
+	"thingworx": {
+		"thingname": "ConnectedTurret",
+		"thingdesc": "Test Turret",
+		"appkey": "32491397-f468-4dbc-858a-376ff92aae02",
+		"uri": "wss://54.86.136.65:443/Thingworx/WS"
+	}
+}
