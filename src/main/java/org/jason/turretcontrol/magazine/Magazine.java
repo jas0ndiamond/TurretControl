@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol.magazine;
+package org.jason.turretcontrol.magazine;
 
 public abstract class Magazine 
 {

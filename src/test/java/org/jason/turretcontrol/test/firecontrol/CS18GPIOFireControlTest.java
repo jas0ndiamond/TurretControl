@@ -1,27 +1,26 @@
-package test.java.turretcontrol.firecontrol;
+package org.jason.turretcontrol.test.firecontrol;
 
-import main.java.org.jason.turretcontrol.TurretControl;
-import main.java.org.jason.turretcontrol.config.ConfigLoader;
-import main.java.org.jason.turretcontrol.exception.JamOccurredException;
-import main.java.org.jason.turretcontrol.exception.NoAmmoException;
-import main.java.org.jason.turretcontrol.exception.SafetyEngagedException;
-
+import org.jason.turretcontrol.TurretControl;
+import org.jason.turretcontrol.config.ConfigLoader;
+import org.jason.turretcontrol.exception.JamOccurredException;
+import org.jason.turretcontrol.exception.NoAmmoException;
+import org.jason.turretcontrol.exception.SafetyEngagedException;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class G36GPIOFireControlTest 
+public class CS18GPIOFireControlTest 
 {
 	private TurretControl turretControl;
 
 	@BeforeMethod
 	public void setup() throws Exception
 	{
-		String tcConfig = ConfigLoader.getConfigJSONObject("src/test/java/G36TurretConfig.json")
+		String tcConfig = ConfigLoader.getConfigJSONObject("src/test/java/CS18TurretConfig.json")
 				.getString("turret");
-	
+
 		try
 		{	
 			turretControl = new TurretControl(tcConfig);
@@ -41,7 +40,7 @@ public class G36GPIOFireControlTest
 		}
 	}
 	
-	@Test(groups={"G36FireControl"})
+	@Test(groups={"CS18FireControl"})
 	public void safetySetTest()
 	{
 		Assert.assertTrue(turretControl.getSafety());
@@ -55,13 +54,13 @@ public class G36GPIOFireControlTest
 		Assert.assertTrue(turretControl.getSafety());
 	}
 	
-	@Test(groups={"G36FireControl"}, expectedExceptions=NoAmmoException.class)
+	@Test(groups={"CS18FireControl"}, expectedExceptions=NoAmmoException.class)
 	public void cycleWithNoAmmoTest() throws JamOccurredException, SafetyEngagedException, NoAmmoException
 	{
 		turretControl.fire();
 	}
 	
-	@Test(groups={"G36FireControl"}, expectedExceptions=SafetyEngagedException.class)
+	@Test(groups={"CS18FireControl"}, expectedExceptions=SafetyEngagedException.class)
 	public void cycleWithDefaultSafetyOnTest() throws JamOccurredException, SafetyEngagedException, NoAmmoException
 	{
 		Assert.assertFalse(turretControl.isChamberFilled());
@@ -71,7 +70,7 @@ public class G36GPIOFireControlTest
 		Assert.assertFalse(turretControl.isChamberFilled());
 	}
 	
-	@Test(groups={"G36FireControl"})
+	@Test(groups={"CS18FireControl"})
 	public void cycleOnceSuccessfulTest() throws JamOccurredException, SafetyEngagedException, NoAmmoException
 	{
 		Assert.assertFalse(turretControl.isChamberFilled());
@@ -82,7 +81,7 @@ public class G36GPIOFireControlTest
 		Assert.assertFalse(turretControl.isChamberFilled());
 	}
 	
-	@Test(groups={"G36FireControl"}, expectedExceptions=NoAmmoException.class)
+	@Test(groups={"CS18FireControl"}, expectedExceptions=NoAmmoException.class)
 	public void depleteMagazineTest() throws JamOccurredException, SafetyEngagedException, NoAmmoException, InterruptedException
 	{
 		int magSize = 4;
@@ -110,7 +109,7 @@ public class G36GPIOFireControlTest
 		turretControl.fire();
 	}
 	
-	@Test(groups={"G36FireControl"}, expectedExceptions=NoAmmoException.class)
+	@Test(groups={"CS18FireControl"}, expectedExceptions=NoAmmoException.class)
 	public void depleteMagazineWithReloadTest() throws JamOccurredException, SafetyEngagedException, NoAmmoException, InterruptedException
 	{
 		int magSize = 4;

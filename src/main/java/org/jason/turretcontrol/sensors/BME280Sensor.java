@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol.sensors;
+package org.jason.turretcontrol.sensors;
 
 // Distributed with a free-will license.
 // Use it any way you want, profit or free, provided it fits in the licenses of its associated works.
@@ -6,12 +6,12 @@ package main.java.org.jason.turretcontrol.sensors;
 // This code is designed to work with the BME280_I2CS I2C Mini Module available from ControlEverything.com.
 // https://www.controleverything.com/content/Humidity?sku=BME280_I2CS#tabs-0-product_tabset-2
 
+import java.io.IOException;
+
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
-
-import java.io.IOException;
 
 public abstract class BME280Sensor
 {

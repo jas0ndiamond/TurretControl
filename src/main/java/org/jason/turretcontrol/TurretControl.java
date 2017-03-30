@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol;
+package org.jason.turretcontrol;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -6,16 +6,15 @@ import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import main.java.org.jason.turretcontrol.exception.JamOccurredException;
-import main.java.org.jason.turretcontrol.exception.NoAmmoException;
-import main.java.org.jason.turretcontrol.exception.SafetyEngagedException;
-import main.java.org.jason.turretcontrol.firecontrol.CS18GPIOFireControl;
-import main.java.org.jason.turretcontrol.firecontrol.FireControl;
-import main.java.org.jason.turretcontrol.firecontrol.G36GPIOFireControl;
-import main.java.org.jason.turretcontrol.firecontrol.MockFireControl;
-import main.java.org.jason.turretcontrol.motors.MotorControl;
-
 import org.codehaus.jettison.json.JSONObject;
+import org.jason.turretcontrol.exception.JamOccurredException;
+import org.jason.turretcontrol.exception.NoAmmoException;
+import org.jason.turretcontrol.exception.SafetyEngagedException;
+import org.jason.turretcontrol.firecontrol.CS18GPIOFireControl;
+import org.jason.turretcontrol.firecontrol.FireControl;
+import org.jason.turretcontrol.firecontrol.G36GPIOFireControl;
+import org.jason.turretcontrol.firecontrol.MockFireControl;
+import org.jason.turretcontrol.motors.MotorControl;
 
 public class TurretControl 
 {

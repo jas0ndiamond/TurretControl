@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol.orientation;
+package org.jason.turretcontrol.orientation;
 
 public class OrientationControl {
 

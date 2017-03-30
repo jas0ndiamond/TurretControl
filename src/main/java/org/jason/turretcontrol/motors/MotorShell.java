@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol.motors;
+package org.jason.turretcontrol.motors;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,10 +1,10 @@
-package main.java.org.jason.turretcontrol.motors;
+package org.jason.turretcontrol.motors;
+
+import java.io.IOException;
 
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
-
-import java.io.IOException;
 
 public class PWM
 {

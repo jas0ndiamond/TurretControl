@@ -1,6 +1,4 @@
-package main.java.org.jason.turretcontrol.motors;
-
-import com.pi4j.io.i2c.I2CFactory;
+package org.jason.turretcontrol.motors;
 
 import java.io.IOException;
 

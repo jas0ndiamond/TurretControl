@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol;
+package org.jason.turretcontrol;
 
 import java.util.HashMap;
 

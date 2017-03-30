@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol.config;
+package org.jason.turretcontrol.config;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

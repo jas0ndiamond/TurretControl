@@ -1,10 +1,9 @@
-package main.java.org.jason.turretcontrol.firecontrol;
+package org.jason.turretcontrol.firecontrol;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import main.java.org.jason.turretcontrol.exception.JamOccurredException;
-import main.java.org.jason.turretcontrol.exception.NoAmmoException;
-import main.java.org.jason.turretcontrol.exception.SafetyEngagedException;
+import org.jason.turretcontrol.exception.JamOccurredException;
+import org.jason.turretcontrol.exception.SafetyEngagedException;
 
 public abstract class FireControl {
 

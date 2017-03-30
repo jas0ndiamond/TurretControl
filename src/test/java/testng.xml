@@ -2,27 +2,27 @@
   
     <test name="Magazine">
     <classes>
-      <class name="test.java.turretcontrol.magazine.MagazineTest"/>
+      <class name="org.jason.turretcontrol.test.magazine.MagazineTest"/>
     </classes>
   </test>
   
   <test name="TurretControl">
     <classes>
-      <class name="test.java.turretcontrol.TurretControlTest"/>
+      <class name="org.jason.turretcontrol.test.TurretControlTest"/>
     </classes>
   </test>
   
   
   <test name="G36FireControl">
     <classes>
-      <class name="test.java.turretcontrol.firecontrol.G36GPIOFireControlTest"/>
+      <class name="org.jason.turretcontrol.test.firecontrol.G36GPIOFireControlTest"/>
     </classes>
   </test>
   
   
   <test name="CS18FireControl">
     <classes>
-      <class name="test.java.turretcontrol.firecontrol.CS18GPIOFireControlTest"/>
+      <class name="org.jason.turretcontrol.test.firecontrol.CS18GPIOFireControlTest"/>
     </classes>
   </test>
   

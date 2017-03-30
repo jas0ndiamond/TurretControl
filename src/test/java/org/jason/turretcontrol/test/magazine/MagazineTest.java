@@ -1,7 +1,6 @@
-package test.java.turretcontrol.magazine;
+package org.jason.turretcontrol.test.magazine;
 
-import main.java.org.jason.turretcontrol.magazine.Magazine;
-
+import org.jason.turretcontrol.magazine.Magazine;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;

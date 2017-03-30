@@ -1,13 +1,12 @@
-package main.java.org.jason.turretcontrol.app.shell;
+package org.jason.turretcontrol.app.shell;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.codehaus.jettison.json.JSONObject;
-
-import main.java.org.jason.turretcontrol.TurretControl;
-import main.java.org.jason.turretcontrol.config.ConfigLoader;
+import org.jason.turretcontrol.TurretControl;
+import org.jason.turretcontrol.config.ConfigLoader;
 
 public class TurretControlShell 
 {

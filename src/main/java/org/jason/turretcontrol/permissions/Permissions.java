@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol.permissions;
+package org.jason.turretcontrol.permissions;
 
 public abstract class Permissions {
 	public abstract class Names

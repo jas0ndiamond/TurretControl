@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol.gpio;
+package org.jason.turretcontrol.gpio;
 
 import java.util.HashMap;
 

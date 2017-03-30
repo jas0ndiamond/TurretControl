@@ -1,11 +1,11 @@
-package main.java.org.jason.turretcontrol.motors;
+package org.jason.turretcontrol.motors;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-import main.java.org.jason.turretcontrol.motors.AdafruitMotorHAT.AdafruitStepperMotor;
-import main.java.org.jason.turretcontrol.motors.AdafruitMotorHAT.ServoCommand;
-import main.java.org.jason.turretcontrol.motors.AdafruitMotorHAT.Style;
+import org.jason.turretcontrol.motors.AdafruitMotorHAT.AdafruitStepperMotor;
+import org.jason.turretcontrol.motors.AdafruitMotorHAT.ServoCommand;
+import org.jason.turretcontrol.motors.AdafruitMotorHAT.Style;
 
 public class MotorControl {
 

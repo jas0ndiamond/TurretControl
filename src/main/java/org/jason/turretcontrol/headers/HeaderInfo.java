@@ -1,4 +1,4 @@
-package main.java.org.jason.turretcontrol.headers;
+package org.jason.turretcontrol.headers;
 
 public abstract class HeaderInfo {
 	public abstract class Names

@@ -1,16 +1,16 @@
-package main.java.org.jason.turretcontrol.app.spark;
+package org.jason.turretcontrol.app.spark;
 
 import static spark.Spark.get;
 
 import java.util.LinkedHashMap;
 
-import main.java.org.jason.turretcontrol.TurretControl;
-import main.java.org.jason.turretcontrol.config.ConfigLoader;
-import main.java.org.jason.turretcontrol.exception.JamOccurredException;
-import main.java.org.jason.turretcontrol.exception.NoAmmoException;
-import main.java.org.jason.turretcontrol.exception.SafetyEngagedException;
-import main.java.org.jason.turretcontrol.headers.HeaderInfo;
-import main.java.org.jason.turretcontrol.permissions.Permissions;
+import org.jason.turretcontrol.TurretControl;
+import org.jason.turretcontrol.config.ConfigLoader;
+import org.jason.turretcontrol.exception.JamOccurredException;
+import org.jason.turretcontrol.exception.NoAmmoException;
+import org.jason.turretcontrol.exception.SafetyEngagedException;
+import org.jason.turretcontrol.headers.HeaderInfo;
+import org.jason.turretcontrol.permissions.Permissions;
 
 public class SparkTurretControlApp {
 
