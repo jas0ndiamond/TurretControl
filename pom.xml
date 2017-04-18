@@ -8,6 +8,16 @@
 	<build>
 		<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp}</finalName>
 
+
+	<resources>
+		<resource>
+			<directory>.</directory>
+			<includes>
+				<include>scripts/**</include>
+			</includes>
+		</resource>
+	</resources>
+
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -15,7 +25,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>main.java.org.jason.turretcontrol.app.spark.SparkTurretControlApp</mainClass>
+							<mainClass>org.jason.turretcontrol.app.spark.SparkTurretControlApp</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
@@ -31,7 +41,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>main.java.org.jason.turretcontrol.app.spark.SparkTurretControlApp</mainClass>
+							<mainClass>org.jason.turretcontrol.app.spark.SparkTurretControlApp</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -99,6 +109,11 @@
 		<dependency>
 			<groupId>com.pi4j</groupId>
 			<artifactId>pi4j-core</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pi4j</groupId>
+			<artifactId>pi4j-device</artifactId>
 			<version>1.1</version>
 		</dependency>
 		<dependency>

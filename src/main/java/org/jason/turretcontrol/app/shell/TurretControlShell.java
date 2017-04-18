@@ -7,10 +7,15 @@ import java.io.InputStreamReader;
 import org.codehaus.jettison.json.JSONObject;
 import org.jason.turretcontrol.TurretControl;
 import org.jason.turretcontrol.config.ConfigLoader;
+import org.jason.turretcontrol.demo.DemoRunner;
+import org.jason.turretcontrol.exception.JamOccurredException;
+import org.jason.turretcontrol.exception.NoAmmoException;
+import org.jason.turretcontrol.exception.SafetyEngagedException;
 
 public class TurretControlShell 
 {
 	private final static String CONFIG_FILE = "./config/config.json";
+	
 	
 	public static void main(String[] args) throws Exception
 	{
@@ -30,7 +35,7 @@ public class TurretControlShell
 		
 		
 		//check demo config
-		Thread demoThread = null;
+		DemoRunner demo = null;
 		
 		try
 		{
@@ -81,12 +86,13 @@ public class TurretControlShell
 						"moveX val direction\n" +
 						"moveY val direction\n" +
 						"moveZ val direction\n" +
-						"panX steps direction step_type\n" + 
-						"panY steps direction step_type\n" +
+						"panX steps direction\n" + 
+						"panY steps direction\n" +
 						"panXhome\n" + 
 						"panYhome\n" +
 						"panHome\n" +
 						"getAmmo\n" +
+						"reload magName\n" + 
 						"resetAmmo\n" +
 						"getMagSize\n" +
 						"setMagSize val\n" +
@@ -101,7 +107,22 @@ public class TurretControlShell
 				}
 				else if(command.equals("fire"))
 				{
-					tc.fire();
+					try
+					{
+						tc.fire();
+					}
+					catch(NoAmmoException e)
+					{
+						e.printStackTrace();
+					}
+					catch(JamOccurredException e)
+					{
+						e.printStackTrace();
+					}
+					catch(SafetyEngagedException e)
+					{
+						e.printStackTrace();
+					}
 					System.out.println("Cycle completed");
 				}
 				else if(command.equals("getAmmo"))
@@ -128,19 +149,21 @@ public class TurretControlShell
 				else if(command.equals("safetyOff"))
 				{
 					tc.setSafety(false);
-					System.out.println("Safety disengaged: " + tc.getSafety());
+					System.out.println("Safety engaged: " + tc.getSafety());
+				}
+				else if(command.equalsIgnoreCase("killmotors"))
+				{
+					tc.killMotors();
 				}
 				else if(command.startsWith("panX"))
 				{
 					cmdArgs = command.split(" ");
-					if(cmdArgs.length == 4)
+					if(cmdArgs.length == 3)
 					{
 						int steps = Integer.parseInt(cmdArgs[1]);
 						int direction = Integer.parseInt(cmdArgs[2]);
-						int style = Integer.parseInt(cmdArgs[3]);
 						
-						
-						tc.panX(steps, direction, style);
+						tc.panX(steps, direction);
 					}
 					else
 					{
@@ -150,19 +173,27 @@ public class TurretControlShell
 				else if(command.startsWith("panY"))
 				{
 					cmdArgs = command.split(" ");
-					if(cmdArgs.length == 4)
+					if(cmdArgs.length == 3)
 					{
 						int steps = Integer.parseInt(cmdArgs[1]);
 						int direction = Integer.parseInt(cmdArgs[2]);
-						int style = Integer.parseInt(cmdArgs[3]);
 						
-						
-						tc.panY(steps, direction, style);
+						tc.panY(steps, direction);
 					}
 					else
 					{
 						System.out.println("Malformed command");
 					}
+				}
+				else if(command.startsWith("reload"))
+				{
+					 String magName = command.split("\\s+")[1];
+					 
+					 tc.reload(magName); 
+				}
+				else if(command.equals("resetAmmo"))
+				{
+					//reload current magazine
 				}
 				else if(command.equals("panXhome"))
 				{
@@ -178,11 +209,16 @@ public class TurretControlShell
 				}
 				else if(command.equals("startDemo"))
 				{
-					//launch thread to rotate turret on loop, firing at an interval and fixed position
+					demo = new DemoRunner(tc);
+					demo.start();
 				}
 				else if(command.equals("stopDemo"))
 				{
 					//stop thread launched by startDemo, return turret to home
+					if(demo != null)
+					{
+						demo.setRunning(false);
+					}	
 				}
 				else
 				{
@@ -205,9 +241,10 @@ public class TurretControlShell
 		}
 	}
 	
-	private class DemoMode extends Thread
+	/*
+	private class DemoRunner extends Thread
 	{
-		private TurretControl turrentControl;
+		private TurretControl turretControl;
 		private boolean running;
 		private int yPosOffset;
 
@@ -223,9 +260,9 @@ public class TurretControlShell
 		private long cycleInterval;
 		private final static long DEFAULT_CYCLE_INTERVAL = 60L * 1000L * 5L; //5 mins
 		
-		public DemoMode(TurretControl t)
+		public DemoRunner(TurretControl t)
 		{
-			turrentControl = t;
+			turretControl = t;
 			running = false;
 			
 			yPosOffset= DEFAULT_DEMO_Y_POS_OFFSET;
@@ -307,5 +344,6 @@ public class TurretControlShell
 			return running;
 		}
 	}
+	*/
 
 }

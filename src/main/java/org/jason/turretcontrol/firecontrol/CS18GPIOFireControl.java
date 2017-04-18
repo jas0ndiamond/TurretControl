@@ -44,20 +44,20 @@ public class CS18GPIOFireControl extends FireControl {
 	public CS18GPIOFireControl(String config)
 	{
 		super(config);
+		
 		/*
 		 * Your python code uses the BCM index mode, whose port mappings are listed in the table. 
 		 * In this case, the BCM port 4 maps to GPIO_7 in Pi4j instead of the GPIO_4 you use in your java code.
 		 */
 		
-		
 		//harvest pins from config in json format, exception for fails
-		triggerPin = 7;
-		accelPin = 11;
+		triggerPin = 0;
+		accelPin = 7;
 		
 		pirPin = 12;
 		
 		triggerDuration = 450;
-		accelStartDuration = 750;
+		accelStartDuration = 1000;
 		accelStopDuration = 250;
 		
 		startup();
@@ -87,8 +87,6 @@ public class CS18GPIOFireControl extends FireControl {
 				//activate pir, launch thread that waits for motion of projectile
 				//maybe look into setting gpio listener
 				
-
-				
 				try
 				{
 					//start the flywheels and wait till they get up to speed
@@ -109,6 +107,8 @@ public class CS18GPIOFireControl extends FireControl {
 					//not the end of the world if the trigger duration is interrupted
 					//will still need to close the relay and it's worthwhile to confirm round exit
 					e.printStackTrace();
+					
+					//this is technically a jam, but throwing the jam exception is handled in the finally block
 				}
 				finally
 				{
@@ -175,7 +175,7 @@ public class CS18GPIOFireControl extends FireControl {
 
 		
 		//set trigger gpio
-		accel = GpioConfigurationFactory.getGpioOutputPin(gpio, GpioConfigurationFactory.lookupPin(accelPin), "Trigger", PinState.HIGH);
+		accel = GpioConfigurationFactory.getGpioOutputPin(gpio, GpioConfigurationFactory.lookupPin(accelPin), "TriggerAccel", PinState.HIGH);
 
 		//set pir
 		barrelExitPir = GpioConfigurationFactory.getGpioInputPin(gpio, GpioConfigurationFactory.lookupPin(pirPin), "BarrelExit", PinPullResistance.PULL_DOWN);

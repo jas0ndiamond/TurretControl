@@ -1,6 +1,7 @@
-package org.jason.turretcontrol.motors;
+package org.jason.turretcontrol.motors.driver.old;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class AdafruitMotorHAT
 {
@@ -246,6 +247,15 @@ public class AdafruitMotorHAT
       this.secPerStep = 60.0 / (this.revSteps * rpm);
       this.steppingCounter = 0;
     }
+    
+    public void shutdown() throws IOException
+    {
+        this.mc.setPin(this.AIN2, 0);
+        this.mc.setPin(this.BIN1, 0);
+        this.mc.setPin(this.AIN1, 0);
+        this.mc.setPin(this.BIN2, 0);
+    }
+    
                   
     public int oneStep(ServoCommand dir, Style style) throws IOException
     {
@@ -366,7 +376,8 @@ public class AdafruitMotorHAT
                                            {1, 0, 0, 1} };
         coils = step2coils[this.currentStep / (this.MICROSTEPS / 2)];
       } 
-      // print "coils state = " + str(coils)
+      
+      System.out.println( "coils state = " + Arrays.toString(coils)  );
       this.mc.setPin(this.AIN2, coils[0]);
       this.mc.setPin(this.BIN1, coils[1]);
       this.mc.setPin(this.AIN1, coils[2]);

@@ -1,5 +1,8 @@
 package org.jason.turretcontrol.test;
 
+import java.util.Collections;
+import java.util.HashSet;
+
 import org.jason.turretcontrol.TurretControl;
 import org.jason.turretcontrol.config.ConfigLoader;
 import org.jason.turretcontrol.exception.JamOccurredException;
@@ -90,4 +93,24 @@ public class TurretControlTest {
 		turretControl.fire();
 		Assert.assertFalse(turretControl.isChamberFilled());
 	}
+	
+	@Test(groups={"TurretControl"})
+	public void supportedMagazinesBasicTest() 
+	{
+		String[] foundMagazines = turretControl.getSupportedMagazines();
+		Assert.assertEquals(2, foundMagazines.length);
+		
+		HashSet<String> magazines = new HashSet<String>();
+		
+		magazines.add(foundMagazines[0]);
+		magazines.add(foundMagazines[1]);
+			
+		Assert.assertTrue(magazines.contains("NStrikeStandard"));
+		Assert.assertTrue(magazines.contains("NStrikeExtended"));
+	}
+	
+	
+	
+	
+	
 }

@@ -1,11 +1,12 @@
-package org.jason.turretcontrol.motors;
+package org.jason.turretcontrol.motors.driver.old;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.jason.turretcontrol.motors.AdafruitMotorHAT.AdafruitStepperMotor;
-import org.jason.turretcontrol.motors.AdafruitMotorHAT.ServoCommand;
-import org.jason.turretcontrol.motors.AdafruitMotorHAT.Style;
+import org.jason.turretcontrol.motors.driver.old.AdafruitMotorHAT;
+import org.jason.turretcontrol.motors.driver.old.AdafruitMotorHAT.AdafruitStepperMotor;
+import org.jason.turretcontrol.motors.driver.old.AdafruitMotorHAT.ServoCommand;
+import org.jason.turretcontrol.motors.driver.old.AdafruitMotorHAT.Style;
 
 public class MotorControl {
 
@@ -32,8 +33,8 @@ public class MotorControl {
 		private static final long serialVersionUID = 4739823974683355020L;
 
 		{
-			put(MOTOR_X_ID, AdafruitMotorHAT.AdafruitStepperMotor.PORT_M1_M2);
-			put(MOTOR_Y_ID, AdafruitMotorHAT.AdafruitStepperMotor.PORT_M3_M4);
+			put(MOTOR_Y_ID, AdafruitMotorHAT.AdafruitStepperMotor.PORT_M1_M2);
+			put(MOTOR_X_ID, AdafruitMotorHAT.AdafruitStepperMotor.PORT_M3_M4);
 		}
 	};
 	

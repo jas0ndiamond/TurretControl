@@ -17,6 +17,7 @@ public abstract class GpioConfigurationFactory
 	{
 		private static final long serialVersionUID = 7651562087368603073L;
 		{
+			put(0, RaspiPin.GPIO_00);
 			put(1, RaspiPin.GPIO_01);
 			put(2, RaspiPin.GPIO_02);
 			put(3, RaspiPin.GPIO_03);
@@ -81,7 +82,7 @@ public abstract class GpioConfigurationFactory
 		boolean retval = false;
 		try
 		{
-			GpioFactory.getInstance().shutdown();;
+			GpioFactory.getInstance().shutdown();
 			retval  = true;
 		}
 		catch(Exception e)

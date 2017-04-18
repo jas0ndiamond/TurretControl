@@ -12,9 +12,9 @@ public abstract class Magazine
 	
 	public int roundsRemaining;
 	
-	public String desc;
+	public String name;
 	
-	protected Magazine(int roundsRemaining, int capacity, String desc)
+	protected Magazine(int roundsRemaining, int capacity, String name)
 	{
 		if (capacity <= 0)
 		{
@@ -28,7 +28,7 @@ public abstract class Magazine
 		
 		this.roundsRemaining = roundsRemaining;
 		this.capacity = capacity;
-		this.desc = desc;
+		this.name = name;
 	}
 	
 	protected Magazine(int capacity)
@@ -53,6 +53,9 @@ public abstract class Magazine
 	
 	public void getRound()
 	{
-		roundsRemaining--;
+		if(roundsRemaining > 0)
+		{
+			roundsRemaining--;
+		}
 	}
 }

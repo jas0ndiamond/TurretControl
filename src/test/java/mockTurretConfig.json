@@ -1,16 +1,19 @@
 {
 	"turret": {
 		"username": "jason",
-		"barrelExitSensorGPIOPin": 9,
 		"tempSensor": {
 			"bus": 1,
 			"address": "0x77"
 		},
 		"name": "Turret 1",
 		"type": "MockFireControl",
-		"magazine": {
-			"name": "G36Standard",
-			"capacity": 30
+		"magazines": {
+			"NStrikeStandard": {
+				"capacity": 10
+			},
+			"NStrikeExtended": {
+				"capacity": 18
+			}
 		},
 		"panning": {
 			"hat_address": "0x60",
@@ -34,7 +37,6 @@
 		},
 		"movement": {},
 		"desc": "Mock Fire Control",
-
 		"rated_specs": {
 			"barrel_max_rounds": 2000,
 			"barrel_max_temp": 50,

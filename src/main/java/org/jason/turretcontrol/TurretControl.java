@@ -14,7 +14,7 @@ import org.jason.turretcontrol.firecontrol.CS18GPIOFireControl;
 import org.jason.turretcontrol.firecontrol.FireControl;
 import org.jason.turretcontrol.firecontrol.G36GPIOFireControl;
 import org.jason.turretcontrol.firecontrol.MockFireControl;
-import org.jason.turretcontrol.motors.MotorControl;
+import org.jason.turretcontrol.motors.wrapper.MotorControl;
 
 public class TurretControl 
 {
@@ -24,6 +24,7 @@ public class TurretControl
 	private FireControl fc;
 	
 	private HashMap<String, HashMap<String, String>> permissions;
+	private HashMap<String, Integer> supportedMagazines;
 
 	private final static int DEFAULT_PAN = 10;
 	private final static int DEFAULT_MOVEMENT = 10;
@@ -41,6 +42,7 @@ public class TurretControl
 	
 	public TurretControl(String configString) throws Exception
 	{
+		supportedMagazines = new HashMap<>();
 		magSize = 0;
 		ammoCount = new AtomicInteger(DEFAULT_AMMO_COUNT);
 		chamberFilled = new AtomicBoolean(false);
@@ -104,17 +106,20 @@ public class TurretControl
         
         ///////////////////////
         //motor control
-        if(!fireControlName.equals("MockFireControl") && this.config.has("panning"))
+        //if(!fireControlName.equals("MockFireControl") && this.config.has("panning"))
+        if(this.config.has("panning"))
         {
         	JSONObject panningConfig = this.config.getJSONObject("panning"); 
-        	
-        	String hatAddr = panningConfig.getString("hat_address");
-        	int hatFreq = panningConfig.getInt("hat_freq");
+        	        	
+//        	String hatAddr = panningConfig.getString("hat_address");
+//        	int hatFreq = panningConfig.getInt("hat_freq");
         	
         	JSONObject motors = panningConfig.getJSONObject("motors");
         	
-        	motorControl = new MotorControl(0x60, hatFreq);
+        	System.out.println("Found motors config: " + motors.toString());
         	
+        	motorControl = new MotorControl();
+        	        	
     		JSONObject motorConfig; 
     		
         	Iterator keyIterator = motors.keys();
@@ -132,11 +137,32 @@ public class TurretControl
 
 				int port = motorConfig.getInt("port");
 				int speed = motorConfig.getInt("speed");
-				int min = motorConfig.getInt("min");
-				int max = motorConfig.getInt("max");
-				motorControl.addMotor(motorName, port, speed, min, max);
+//				int min = motorConfig.getInt("min");
+//				int max = motorConfig.getInt("max");
+				int style = motorConfig.getInt("style");
+				int stepsPerRev = motorConfig.getInt("steps_per_revolution");
+				motorControl.addMotor(motorName, port, speed, style,  stepsPerRev);
         		
         	}        	
+        }
+        
+        /////////////////////////
+        //magazine management
+        if(this.config.has("magazines"))
+        {
+        	JSONObject magazineConfig = config.getJSONObject("magazines");	
+        	Iterator<?> keyIterator = magazineConfig.keys();
+        	String magName;
+        	int capacity;
+        	while(keyIterator.hasNext())
+        	{
+        		magName = (String)(keyIterator.next() );
+        		capacity = magazineConfig.getJSONObject(magName).getInt("capacity");
+        		System.out.println("Adding supported magazine " + magName + " with capacity " + capacity
+        				);
+        		
+        		supportedMagazines.put(magName, capacity);
+        	}
         }
 	}
 	
@@ -168,6 +194,21 @@ public class TurretControl
 		if(size > 0)
 		{
 			magSize = size;
+		}
+	}
+	
+	public void killMotors() 
+	{
+		if(motorControl != null)
+		{
+			try
+			{
+				motorControl.killMotors();
+			}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -217,11 +258,11 @@ public class TurretControl
 		}
 	}
 	
-	public synchronized void panX(int steps, int direction, int style)
+	public synchronized void panX(int steps, int direction)
 	{
 		try
 		{
-			motorControl.stepMotor(MotorControl.MOTOR_X_NAME, steps, direction, style);
+			motorControl.stepMotorX(steps, direction);
 		}
 		catch(IOException e)
 		{
@@ -229,11 +270,11 @@ public class TurretControl
 		}
 	}
 	
-	public synchronized void panY(int steps, int direction, int style)
+	public synchronized void panY(int steps, int direction)
 	{
 		try
 		{
-			motorControl.stepMotor(MotorControl.MOTOR_Y_NAME, steps, direction, style);
+			motorControl.stepMotorY(steps, direction);
 		}
 		catch(IOException e)
 		{
@@ -260,11 +301,7 @@ public class TurretControl
 	{
 		fc.shutdown();
 		
-		if(motorControl != null)
-		{
-			motorControl.shutdown();
-		}
-		
+		killMotors();
 	}
 	
 	public void reset() throws InterruptedException
@@ -282,5 +319,20 @@ public class TurretControl
 		}
 		
 		return retval ;
+	}
+
+	public synchronized void reload(String magName) 
+	{
+		Integer magCap = supportedMagazines.get(magName);
+		
+		if(magCap != null)
+		{
+			setAmmoCount(magCap);
+		}
+	}
+
+	public String[] getSupportedMagazines() 
+	{
+		return supportedMagazines.keySet().toArray(new String[supportedMagazines.size()]);
 	}
 }

@@ -1,40 +1,44 @@
 {
 	"turret": {
 		"username": "jason",
-		"barrelExitSensorGPIOPin": 9,
 		"tempSensor": {
 			"bus": 1,
 			"address": "0x77"
 		},
 		"name": "Turret 1",
-		"type": "MockFireControl",
-		"magazine": {
-			"name": "G36Standard",
-			"capacity": 30
+		"type": "CS18GPIOFireControl",
+		"magazines": {
+			"NStrikeStandard": {
+				"capacity": 10
+			},
+			"NStrikeExtended": {
+				"capacity": 18
+			}
 		},
 		"panning": {
 			"hat_address": "0x60",
 			"hat_freq": 1600,
 			"motors": {
 				"motor_x": {
-					"port": 0,
-					"speed": 30,
-					"state_file": "motor_x.json",
+					"port": 1,
+					"speed": 4,
+					"steps_per_revolution": 200,
 					"min": 0,
-					"max": 200
+					"max": 80,
+					"style": 3
 				},
 				"motor_y": {
-					"port": 1,
-					"speed": 30,
-					"state_file": "motor_y.json",
+					"port": 2,
+					"speed": 4,
+					"steps_per_revolution": 200,
 					"min": 0,
-					"max": 200
+					"max": 80, 
+					"style": 3
 				}
 			}
 		},
 		"movement": {},
-		"desc": "G36",
-
+		"desc": "CS18",
 		"rated_specs": {
 			"barrel_max_rounds": 2000,
 			"barrel_max_temp": 50,
@@ -42,7 +46,7 @@
 			"min_velocity": 100
 		},
 		"firecontrol": {
-			"name": "G36GPIOFireControl",
+			"name": "CS18GPIOFireControl",
 			"distance_to_exit_sensor": 30,
 			"min_round_velocity": 300,
 			"cycle_len": 1000,
