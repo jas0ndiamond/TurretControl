@@ -15,6 +15,8 @@ import org.jason.turretcontrol.firecontrol.FireControl;
 import org.jason.turretcontrol.firecontrol.G36GPIOFireControl;
 import org.jason.turretcontrol.firecontrol.MockFireControl;
 import org.jason.turretcontrol.motors.wrapper.MotorControl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TurretControl 
 {
@@ -23,11 +25,8 @@ public class TurretControl
 
 	private FireControl fc;
 	
-	private HashMap<String, HashMap<String, String>> permissions;
 	private HashMap<String, Integer> supportedMagazines;
 
-	private final static int DEFAULT_PAN = 10;
-	private final static int DEFAULT_MOVEMENT = 10;
 	public final static int DEFAULT_AMMO_COUNT = 0;
 	public final static int DEFAULT_MAG_SIZE = 0;
 
@@ -40,6 +39,8 @@ public class TurretControl
 	
 	private MotorControl motorControl;
 	
+	private final static Logger logger = LoggerFactory.getLogger(TurretControl.class); 
+	
 	public TurretControl(String configString) throws Exception
 	{
 		supportedMagazines = new HashMap<>();
@@ -51,29 +52,29 @@ public class TurretControl
 		
 		//determine fire control module from config
 		
-        String fireControlConfig = this.config.toString();
+        String turretControlConfig = this.config.toString();
         
-        System.out.println("Found firecontrol config " + fireControlConfig);
+        logger.debug("Found turretcontrol config " + turretControlConfig);
         
-        String fireControlName = this.config.getString("type");
+        String fireControlName = this.config.getJSONObject("firecontrol").getString("name");
         
 
-        System.out.println("Found firecontrol " + fireControlName);
+        logger.debug("Found firecontrol " + fireControlName);
         
 
         //////////////////////
         //fire control
         if(fireControlName.equals("MockFireControl"))
         {
-        	fc = new MockFireControl(fireControlConfig);
+        	fc = new MockFireControl(this.config.getString("firecontrol"));
         }
         else if(fireControlName.equals("G36GPIOFireControl"))
         {
-        	fc = new G36GPIOFireControl(fireControlConfig);
+        	fc = new G36GPIOFireControl(this.config.getString("firecontrol"));
         }
         else if(fireControlName.equals("CS18GPIOFireControl"))
         {
-        	fc = new CS18GPIOFireControl(fireControlConfig);
+        	fc = new CS18GPIOFireControl(this.config.getString("firecontrol"));
         }
         else
         {
@@ -93,13 +94,13 @@ public class TurretControl
         	tempSensorBus = this.config.getJSONObject("turret").getJSONObject("tempSensor").getInt("bus");
         	tempSensorAddr = Integer.parseInt(this.config.getJSONObject("turret").getJSONObject("tempSensor").getString("address").substring(2), 16 );
         	
-        	System.out.println("Enabling temp sensor at bus " + tempSensorBus + " and address " + Integer.toHexString(tempSensorAddr));
+        	logger.debug("Enabling temp sensor at bus " + tempSensorBus + " and address " + Integer.toHexString(tempSensorAddr));
         	
         	double[] derp = BME280Sensor.getReading(tempSensorBus, 0x77);
         	
         	for(int i =0; i < derp.length; i++)
         	{
-        		System.out.println(derp[i]);
+        		logger.debug(derp[i]);
         	}
         }
         */
@@ -116,7 +117,7 @@ public class TurretControl
         	
         	JSONObject motors = panningConfig.getJSONObject("motors");
         	
-        	System.out.println("Found motors config: " + motors.toString());
+        	logger.debug("Found motors config: " + motors.toString());
         	
         	motorControl = new MotorControl();
         	        	
@@ -129,20 +130,15 @@ public class TurretControl
         		
         		motorConfig = motors.getJSONObject(motorName);
         		
+        		logger.debug("Found motor " + motorName + " with config " + motorConfig.toString());
         		
-        		System.out.println("Found motor " + motorName + " with config " + motorConfig.toString());
-        		
-        		
-        		
-
 				int port = motorConfig.getInt("port");
 				int speed = motorConfig.getInt("speed");
-//				int min = motorConfig.getInt("min");
-//				int max = motorConfig.getInt("max");
+				int min = motorConfig.getInt("min");
+				int max = motorConfig.getInt("max");
 				int style = motorConfig.getInt("style");
 				int stepsPerRev = motorConfig.getInt("steps_per_revolution");
-				motorControl.addMotor(motorName, port, speed, style,  stepsPerRev);
-        		
+				motorControl.addMotor(motorName, port, speed, style, min, max, stepsPerRev);
         	}        	
         }
         
@@ -158,8 +154,8 @@ public class TurretControl
         	{
         		magName = (String)(keyIterator.next() );
         		capacity = magazineConfig.getJSONObject(magName).getInt("capacity");
-        		System.out.println("Adding supported magazine " + magName + " with capacity " + capacity
-        				);
+        		
+        		logger.debug("Adding supported magazine " + magName + " with capacity " + capacity );
         		
         		supportedMagazines.put(magName, capacity);
         	}
@@ -197,6 +193,16 @@ public class TurretControl
 		}
 	}
 	
+	public synchronized int getPositionX()
+	{
+		return motorControl.getXPos();
+	}
+	
+	public synchronized int getPositionY()
+	{
+		return motorControl.getYPos();
+	}
+	
 	public void killMotors() 
 	{
 		if(motorControl != null)
@@ -207,7 +213,7 @@ public class TurretControl
 			}
 			catch(IOException e)
 			{
-				e.printStackTrace();
+				logger.error("Exception executing killmotors", e);
 			}
 		}
 	}
@@ -266,7 +272,7 @@ public class TurretControl
 		}
 		catch(IOException e)
 		{
-			e.printStackTrace();
+			logger.error("Exception executing panX", e);
 		}
 	}
 	
@@ -278,8 +284,80 @@ public class TurretControl
 		}
 		catch(IOException e)
 		{
-			e.printStackTrace();
+			logger.error("Exception executing panY", e);
 		}	
+	}
+	
+	public synchronized void panXTo(int pos)
+	{
+		try 
+		{
+			motorControl.panXTo(pos);
+		} 
+		catch (IOException e) 
+		{
+			logger.error("Exception executing panXTo", e);
+		}
+	}
+	
+	public synchronized void panYTo(int pos)
+	{
+		try 
+		{
+			motorControl.panYTo(pos);
+		} 
+		catch (IOException e) 
+		{
+			logger.error("Exception executing panYTo", e);
+		}
+	}
+	
+	public synchronized void panTo(int xPos, int yPos)
+	{
+		try 
+		{
+			motorControl.panTo(xPos, yPos);
+		} 
+		catch (IOException e) 
+		{
+			logger.error("Exception executing panTo", e);
+		}
+	}
+	
+	public synchronized void panXHome()
+	{
+		try 
+		{
+			motorControl.panXHome();
+		} 
+		catch (IOException e) 
+		{
+			logger.error("Exception executing panXHome", e);
+		}
+	}
+	
+	public synchronized void panYHome()
+	{
+		try 
+		{
+			motorControl.panYHome();
+		} 
+		catch (IOException e) 
+		{
+			logger.error("Exception executing panYHome", e);
+		}
+	}
+	
+	public synchronized void panHome()
+	{
+		try 
+		{
+			motorControl.panHome();
+		} 
+		catch (IOException e) 
+		{
+			logger.error("Exception executing panHome", e);
+		}
 	}
 	
 	public boolean isChamberFilled()
@@ -300,6 +378,8 @@ public class TurretControl
 	public void shutdown()
 	{
 		fc.shutdown();
+		
+		panHome();
 		
 		killMotors();
 	}
@@ -328,6 +408,10 @@ public class TurretControl
 		if(magCap != null)
 		{
 			setAmmoCount(magCap);
+		}
+		else
+		{
+			logger.warn("Attempted reload of unsupported magazine: " + magName);
 		}
 	}
 
