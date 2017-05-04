@@ -70,6 +70,22 @@ public class TurretControlShell
 				
 				if(command.equals("exit") || command.equals("quit") || command.equals("q") || command.equals("shutdown"))
 				{
+					//stop thread launched by startDemo, return turret to home
+					if(demo != null)
+					{
+						demo.setRunning(false);
+						
+						while(demo.isAlive())
+						{
+							try 
+							{ 
+								System.out.println("Waiting for demo cycle to complete"); 
+								Thread.sleep(2000); 
+							} catch (InterruptedException e) { e.printStackTrace(); }
+						}
+					}	
+					
+					
 					if(tc != null)
 					{
 						tc.shutdown();
@@ -125,15 +141,15 @@ public class TurretControlShell
 					}
 					System.out.println("Cycle completed");
 				}
-				else if(command.equals("getAmmo"))
+				else if(command.equalsIgnoreCase("getAmmo"))
 				{
 					System.out.println(tc.getAmmoCount());
 				}
-				else if(command.equals("getMagSize"))
+				else if(command.equalsIgnoreCase("getMagSize"))
 				{
 					System.out.println(tc.getMagSize());
 				}
-				else if(command.equals("getSafety"))
+				else if(command.equalsIgnoreCase("getSafety"))
 				{
 					System.out.println(tc.getSafety());
 				}
@@ -141,12 +157,12 @@ public class TurretControlShell
 				{
 					//
 				}
-				else if(command.equals("safetyOn"))
+				else if(command.equalsIgnoreCase("safetyOn"))
 				{
 					tc.setSafety(true);				
 					System.out.println("Safety engaged: " + tc.getSafety());
 				}
-				else if(command.equals("safetyOff"))
+				else if(command.equalsIgnoreCase("safetyOff"))
 				{
 					tc.setSafety(false);
 					System.out.println("Safety engaged: " + tc.getSafety());
@@ -164,6 +180,8 @@ public class TurretControlShell
 						int direction = Integer.parseInt(cmdArgs[2]);
 						
 						tc.panX(steps, direction);
+						
+						System.out.println("Turret position: " + tc.getPositionX() + ", " + tc.getPositionY());
 					}
 					else
 					{
@@ -179,6 +197,8 @@ public class TurretControlShell
 						int direction = Integer.parseInt(cmdArgs[2]);
 						
 						tc.panY(steps, direction);
+						
+						System.out.println("Turret position: " + tc.getPositionX() + ", " + tc.getPositionY());
 					}
 					else
 					{
@@ -186,33 +206,31 @@ public class TurretControlShell
 					}
 				}
 				else if(command.startsWith("reload"))
-				{
-					 String magName = command.split("\\s+")[1];
-					 
-					 tc.reload(magName); 
+				{					 
+					tc.reload(command.split("\\s+")[1]); 
 				}
-				else if(command.equals("resetAmmo"))
+				else if(command.equalsIgnoreCase("resetAmmo"))
 				{
 					//reload current magazine
 				}
-				else if(command.equals("panXhome"))
+				else if(command.equalsIgnoreCase("panXhome"))
 				{
 					
 				}
-				else if(command.equals("panYhome"))
+				else if(command.equalsIgnoreCase("panYhome"))
 				{
 					
 				}
-				else if(command.equals("panHome"))
+				else if(command.equalsIgnoreCase("panHome"))
 				{
 					
 				}
-				else if(command.equals("startDemo"))
+				else if(command.equalsIgnoreCase("startDemo") || command.equalsIgnoreCase("demostart"))
 				{
 					demo = new DemoRunner(tc);
 					demo.start();
 				}
-				else if(command.equals("stopDemo"))
+				else if(command.equalsIgnoreCase("stopDemo") || command.equalsIgnoreCase("demostop"))
 				{
 					//stop thread launched by startDemo, return turret to home
 					if(demo != null)
@@ -240,110 +258,4 @@ public class TurretControlShell
 			}
 		}
 	}
-	
-	/*
-	private class DemoRunner extends Thread
-	{
-		private TurretControl turretControl;
-		private boolean running;
-		private int yPosOffset;
-
-		private int xCyclePos;
-		private int yCyclePos;
-		
-		private final static int X_CYCLE_POS_UNDEF = -1;
-		private final static int Y_CYCLE_POS_UNDEF = -1;
-		
-		private final static int PAUSE_LEN = 3000;
-		private final static int DEFAULT_DEMO_Y_POS_OFFSET = 0;
-		
-		private long cycleInterval;
-		private final static long DEFAULT_CYCLE_INTERVAL = 60L * 1000L * 5L; //5 mins
-		
-		public DemoRunner(TurretControl t)
-		{
-			turretControl = t;
-			running = false;
-			
-			yPosOffset= DEFAULT_DEMO_Y_POS_OFFSET;
-			
-			xCyclePos = -1;
-			yCyclePos = -1;
-		}
-		
-		public void setXCyclePos(int val)
-		{
-			//check x motor min/max
-			xCyclePos = val;
-		}
-		
-		public void setYCyclePos(int val)
-		{
-			//check x motor min/max
-			yCyclePos = val;
-		}
-
-		public void setYPosOffset(int offset)
-		{
-			yPosOffset = offset;
-		}
-		
-		@Override
-		public void run()
-		{
-			long lastCycle = -1L;
-			long now;
-			while(running)
-			{
-				now = System.currentTimeMillis();
-				
-				if(xCyclePos != X_CYCLE_POS_UNDEF && yCyclePos != Y_CYCLE_POS_UNDEF && now - lastCycle > cycleInterval)
-				{
-					//return to demo cycle position
-					
-					//cycle turret
-					
-					//update time
-					lastCycle = now;
-				}
-				
-				//pan turret to a random spot
-				
-				//generate random number between x min and x max
-					
-				//generate random number between y min and y max
-				//consider y pos offset. don't want to aim at a person
-				
-				
-				try 
-				{
-					//give the motors a break
-					sleep(PAUSE_LEN);
-				} 
-				catch (InterruptedException e) 
-				{
-					e.printStackTrace();
-				}
-			}
-				
-		}
-		
-		public void startDemo()
-		{
-			running = true;
-			start();
-		}
-		
-		public void stopDemo()
-		{
-			running = false;
-		}
-		
-		public boolean isRunning()
-		{
-			return running;
-		}
-	}
-	*/
-
 }
