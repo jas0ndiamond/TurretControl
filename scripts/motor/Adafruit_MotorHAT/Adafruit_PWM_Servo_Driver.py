@@ -50,23 +50,25 @@ class PWM(object):
     @classmethod
     def softwareReset(cls, i2c=None, i2c_bus=None):
         "Sends a software reset (SWRST) command to all the servo drivers on the bus"
+        
+        print("softwareReset called")
         general_call_i2c = get_i2c_device(0x00, i2c, i2c_bus)
         general_call_i2c.writeRaw8(0x06)        # SWRST
 
     def __init__(self, address=0x40, debug=False, i2c=None, i2c_bus=None):
         self.i2c = get_i2c_device(address, i2c, i2c_bus)
-    
-    #Jason - skip the reset. we want the motors to hold between calls to StepperCommand.
-    #        it's up to the user to cut power to the motors when they're done
-    #        waving the gun around.
-    #
-	#logger.debug("Reseting PCA9685 MODE1 (without SLEEP) and MODE2")
-	#self.setAllPWM(0, 0)
+       
+        #Jason - skip the reset. we want the motors to hold between calls to StepperCommand.
+        #        it's up to the user to cut power to the motors when they're done
+        #        waving the gun around.
+        #
+	    #logger.debug("Reseting PCA9685 MODE1 (without SLEEP) and MODE2")
+	    #self.setAllPWM(0, 0)
         
-	self.i2c.write8(self.__MODE2, self.__OUTDRV)
+        self.i2c.write8(self.__MODE2, self.__OUTDRV)
         self.i2c.write8(self.__MODE1, self.__ALLCALL)
         
-	time.sleep(0.005)                             # wait for oscillator
+        time.sleep(0.005)                             # wait for oscillator
         mode1 = self.i2c.readU8(self.__MODE1)
         mode1 = mode1 & ~self.__SLEEP                 # wake up (reset sleep)
         self.i2c.write8(self.__MODE1, mode1)
