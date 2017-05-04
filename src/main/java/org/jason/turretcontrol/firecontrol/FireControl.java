@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jason.turretcontrol.exception.JamOccurredException;
 import org.jason.turretcontrol.exception.SafetyEngagedException;
+import org.jason.turretcontrol.firecontrol.cycle.CycleResult;
 
 public abstract class FireControl {
 
@@ -41,7 +42,7 @@ public abstract class FireControl {
 		this.isJammed.set(isJammed);
 	}
 	
-	public abstract void cycle() throws JamOccurredException, SafetyEngagedException;
+	public abstract CycleResult cycle() throws JamOccurredException, SafetyEngagedException;
 	
 	public abstract void shutdown();
 	
