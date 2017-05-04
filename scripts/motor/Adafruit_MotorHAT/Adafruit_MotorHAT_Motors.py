@@ -1,6 +1,6 @@
 import time
 
-from Adafruit_MotorHAT.Adafruit_PWM_Servo_Driver import PWM
+from Adafruit_PWM_Servo_Driver import PWM
 
 
 class Adafruit_StepperMotor:
@@ -102,8 +102,8 @@ class Adafruit_StepperMotor:
                 pwm_a = self.MICROSTEP_CURVE[self.currentstep - self.MICROSTEPS*3]
                 pwm_b = self.MICROSTEP_CURVE[self.MICROSTEPS*4 - self.currentstep]
 	
-	#print ("PWM_A: %i"  % pwm_a)
-	#print ("PWM_B: %i" % pwm_b)
+        #print ("PWM_A: %i"  % pwm_a)
+        #print ("PWM_B: %i" % pwm_b)
 
         # go to next 'step' and wrap around
         self.currentstep += self.MICROSTEPS * 4
@@ -126,7 +126,7 @@ class Adafruit_StepperMotor:
             elif (self.currentstep >= self.MICROSTEPS*3) and (self.currentstep < self.MICROSTEPS*4):
                 coils = [1, 0, 0, 1]
         else:
-		step2coils = [     [1, 0, 0, 0],
+            step2coils = [     [1, 0, 0, 0],
                 [1, 1, 0, 0],
                 [0, 1, 0, 0],
                 [0, 1, 1, 0],
@@ -134,8 +134,8 @@ class Adafruit_StepperMotor:
                 [0, 0, 1, 1],
                 [0, 0, 0, 1],
                 [1, 0, 0, 1] ]
-		#print( "Current Step: %i" % self.currentstep)
-		coils = step2coils[self.currentstep//(self.MICROSTEPS//2)]
+        #print( "Current Step: %i" % self.currentstep)
+        coils = step2coils[self.currentstep//(self.MICROSTEPS//2)]
 
         #print "coils state = " + str(coils)
         self.MC.setPin(self.AIN2, coils[0])
