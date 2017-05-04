@@ -1,6 +1,5 @@
 package org.jason.turretcontrol.test;
 
-import java.util.Collections;
 import java.util.HashSet;
 
 import org.jason.turretcontrol.TurretControl;
