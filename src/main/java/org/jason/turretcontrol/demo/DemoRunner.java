@@ -5,100 +5,152 @@ import org.jason.turretcontrol.exception.JamOccurredException;
 import org.jason.turretcontrol.exception.NoAmmoException;
 import org.jason.turretcontrol.exception.SafetyEngagedException;
 import org.jason.turretcontrol.motors.wrapper.MotorControl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DemoRunner extends Thread
 {
 	private TurretControl tc;
 	
-	private boolean isRunning;
+	private boolean runDemo;
+	private final static Logger logger = LoggerFactory.getLogger(DemoRunner.class); 
 
 
 	public DemoRunner(TurretControl tc)
 	{
 		this.tc = tc;
 		
-		isRunning = false;
+		runDemo = false;
 	}
 	
 	public void setRunning(boolean isRunning)
 	{
-		this.isRunning = isRunning;
+		this.runDemo = isRunning;
 	}
 	
+	public void holdTurret()
+	{
+		tc.panX(5, MotorControl.DIRECTION_FORWARD);
+		try { sleep(2000); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+		
+		tc.panX(5, MotorControl.DIRECTION_BACKWARD);
+		try { sleep(2000); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+
+		tc.panY(5, MotorControl.DIRECTION_FORWARD);
+		try { sleep(2000); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+
+		tc.panY(5, MotorControl.DIRECTION_BACKWARD);
+		try { sleep(2000); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+	}
 	
 	@Override
 	public void run()
 	{
-		isRunning = true;
+		runDemo = true;
 				
 		//secure in home position
 
-		tc.panX(5, MotorControl.DIRECTION_FORWARD);
-		try { sleep(2000); } catch (InterruptedException e)	{ e.printStackTrace(); }
-		
-		tc.panX(5, MotorControl.DIRECTION_BACKWARD);
-		try { sleep(2000); } catch (InterruptedException e)	{ e.printStackTrace(); }
-
-		tc.panY(5, MotorControl.DIRECTION_FORWARD);
-		try { sleep(2000); } catch (InterruptedException e)	{ e.printStackTrace(); }
-
-		tc.panY(5, MotorControl.DIRECTION_BACKWARD);
-		try { sleep(2000); } catch (InterruptedException e)	{ e.printStackTrace(); }
+		holdTurret();
 		
 		long lastCycle = System.currentTimeMillis();
 		long now = lastCycle;
-		while(isRunning)
+		final long cycleInterval = 15 * 60 * 1000; //15 mins -> 3/hour -> 18 cycles -> 4.5 hours
+		final long restInterval = 20 * 60 * 1000; //30 mins
+		long lastRest = now;
+		long restTime;
+		final long restLength = 5 * 60 * 1000; //5 mins
+		while(runDemo)
 		{
 			now = System.currentTimeMillis();
 			
-			if(now - lastCycle > (1000 * 60 * 10))
+			if(now - lastRest > restInterval)
+			{
+				logger.info("Entering rest mode");
+				
+				//cease motion, should be at grav neutral, so kill motors and wait
+				tc.killMotors();
+				
+				restTime = 0;
+				while(runDemo && restTime < restLength)
+				{
+					try 
+					{
+						Thread.sleep(2000);
+						restTime += 2000;
+					} 
+					catch (InterruptedException e) 
+					{
+						logger.warn("Sleep interrupted", e);
+					}
+				}
+				
+				lastRest = System.currentTimeMillis();
+				
+				//motors were killed earlier, secure them at grav neutral
+				holdTurret();
+			}
+			else if(now - lastCycle > cycleInterval)
 			{
 				//return to demo cycle position
 				
+				//sleep so offset the turret shaking
+				try { sleep(3000); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+				
 				//cycle turret
-				System.out.println("Cycling turret at " + now);
+				logger.info("Cycling turret at " + now);
 				try 
 				{
 					tc.fire();
 				} 
 				catch (JamOccurredException | SafetyEngagedException | NoAmmoException e) 
 				{
-					e.printStackTrace();
-				}
-				finally
-				{
-					//update time
-					lastCycle = now;
+					logger.error("Cycle failure", e);
 				}
 				
 				//wait for reload
-				while(tc.getAmmoCount() == 0)
+				while(runDemo && tc.getAmmoCount() == 0)
 				{
-					System.out.println("Waiting for reload");
-					try { sleep(5000); } catch (InterruptedException e)	{ e.printStackTrace(); }
+					logger.info("Waiting for reload");
+					try { sleep(5000); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
 				}
+				
+				//update time regardless if cycle succeeded
+				lastCycle = System.currentTimeMillis();
 			}
-			
-			//step x motor
-			
-			tc.panX(40, MotorControl.DIRECTION_FORWARD);
-			try { sleep(1000); } catch (InterruptedException e)	{ e.printStackTrace(); }
-			
-			tc.panX(80, MotorControl.DIRECTION_BACKWARD);
-			try { sleep(1000); } catch (InterruptedException e)	{ e.printStackTrace(); }
-			
-			tc.panX(40, MotorControl.DIRECTION_FORWARD);
-			try { sleep(1000); } catch (InterruptedException e)	{ e.printStackTrace(); }
-			
-			//step y motor
-			tc.panY(40, MotorControl.DIRECTION_FORWARD);
-			try { sleep(1000); } catch (InterruptedException e)	{ e.printStackTrace(); }
-			
-			tc.panY(80, MotorControl.DIRECTION_BACKWARD);
-			try { sleep(1000); } catch (InterruptedException e)	{ e.printStackTrace(); }
-			
-			tc.panY(40, MotorControl.DIRECTION_FORWARD);
-			try { sleep(1000); } catch (InterruptedException e)	{ e.printStackTrace(); }			
+			else
+			{
+				//pan in a clockwise box, then return to grav neutral
+				
+				//top right
+				tc.panX(40, MotorControl.DIRECTION_FORWARD);
+				try { sleep(2500); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+				
+				tc.panY(40, MotorControl.DIRECTION_FORWARD);
+				try { sleep(2500); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+				
+				//bottom right
+				tc.panY(80, MotorControl.DIRECTION_BACKWARD);
+				try { sleep(2500); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+	
+				//bottom left
+				tc.panX(80, MotorControl.DIRECTION_BACKWARD);
+				try { sleep(2500); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+				
+				//top left
+				tc.panY(80, MotorControl.DIRECTION_FORWARD);
+				try { sleep(2500); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+				
+				//top right
+				tc.panX(80, MotorControl.DIRECTION_FORWARD);
+				try { sleep(2500); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+				
+				//center
+				tc.panY(40, MotorControl.DIRECTION_BACKWARD);
+				try { sleep(2500); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+				
+				tc.panX(40, MotorControl.DIRECTION_BACKWARD);
+				try { sleep(2500); } catch (InterruptedException e)	{ logger.warn("Sleep interrupted", e); }
+			}
 		}
 	}
 }
