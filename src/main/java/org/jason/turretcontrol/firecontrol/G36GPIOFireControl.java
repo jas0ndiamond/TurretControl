@@ -3,7 +3,10 @@ package org.jason.turretcontrol.firecontrol;
 import org.codehaus.jettison.json.JSONObject;
 import org.jason.turretcontrol.exception.JamOccurredException;
 import org.jason.turretcontrol.exception.SafetyEngagedException;
+import org.jason.turretcontrol.firecontrol.cycle.CycleResult;
 import org.jason.turretcontrol.gpio.GpioConfigurationFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
@@ -36,6 +39,9 @@ public class G36GPIOFireControl extends FireControl {
 	
 	private JSONObject turretConfig;
 	
+	private final static Logger logger = LoggerFactory.getLogger(G36GPIOFireControl.class); 
+
+	
 	public G36GPIOFireControl(String config)
 	{
 		super(config);
@@ -62,8 +68,10 @@ public class G36GPIOFireControl extends FireControl {
 	}
 	
 	@Override
-	public synchronized void cycle() throws JamOccurredException, SafetyEngagedException
+	public synchronized CycleResult cycle() throws JamOccurredException, SafetyEngagedException
 	{
+		CycleResult cycleResult = new CycleResult();
+		
 		//safety is primary cycle preventer
 		if(!safety.get())
 		{
@@ -91,7 +99,7 @@ public class G36GPIOFireControl extends FireControl {
 				{
 					//not the end of the world if the trigger duration is interrupted
 					//will still need to close the relay and it's worthwhile to confirm round exit
-					e.printStackTrace();
+					logger.error("Cycle interrupted", e);
 				}
 				finally
 				{
@@ -124,6 +132,8 @@ public class G36GPIOFireControl extends FireControl {
 		{
 			throw new SafetyEngagedException("Cycle attempted with safety engaged");
 		}
+		
+		return cycleResult;
 	}
 	
 	public void shutdown()
@@ -163,7 +173,7 @@ public class G36GPIOFireControl extends FireControl {
 	            {
 	            	//barrel exit detection
 	            	//set flags and record system time
-	                System.out.println(" --> GPIO PIN STATE CHANGE: " + event.getPin() + " = " + event.getState());
+	                logger.debug(" --> GPIO PIN STATE CHANGE: " + event.getPin() + " = " + event.getState());
 	            }
 			}
 		);
