@@ -40,6 +40,13 @@ public abstract class GpioConfigurationFactory
 			put(20, RaspiPin.GPIO_20);
 			put(21, RaspiPin.GPIO_21);
 			put(22, RaspiPin.GPIO_22);
+			put(23, RaspiPin.GPIO_23);
+			put(24, RaspiPin.GPIO_24);
+			put(25, RaspiPin.GPIO_25);
+			put(26, RaspiPin.GPIO_26);
+			put(27, RaspiPin.GPIO_27);
+			put(28, RaspiPin.GPIO_28);
+			put(29, RaspiPin.GPIO_29);
 		}
 	};
 	
