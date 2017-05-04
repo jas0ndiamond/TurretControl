@@ -15,8 +15,8 @@ public class MotorShell {
 
 		MotorControl mc = new MotorControl();
 		
-		mc.addMotor(MotorControl.MOTOR_X_NAME, MotorControl.MOTOR_X_ID, 4, 3, 200);
-		mc.addMotor(MotorControl.MOTOR_Y_NAME, MotorControl.MOTOR_Y_ID, 4, 3, 200);
+		mc.addMotor(MotorControl.MOTOR_X_NAME, MotorControl.MOTOR_X_ID, 4, 3, -50, 50, 200);
+		mc.addMotor(MotorControl.MOTOR_Y_NAME, MotorControl.MOTOR_Y_ID, 4, 3, -50, 50, 200);
 		
 		try
 		{
@@ -71,6 +71,28 @@ public class MotorShell {
 							System.out.println("Motor y advanced steps " + steps + " in direction: " + direction);
 						}
 					}
+				}
+				else if(command.startsWith("panX"))
+				{
+					String[] fields = command.split("\\s+");
+					mc.panXTo(Integer.parseInt(fields[1]));
+				}
+				else if(command.startsWith("panY"))
+				{
+					String[] fields = command.split("\\s+");
+					mc.panYTo(Integer.parseInt(fields[1]));
+				}
+				else if(command.equalsIgnoreCase("panxhome"))
+				{
+					mc.panXHome();
+				}
+				else if(command.equalsIgnoreCase("panyhome"))
+				{
+					mc.panYHome();
+				}
+				else if(command.equalsIgnoreCase("panhome"))
+				{
+					mc.panHome();
 				}
 				else if(command.equals("killmotors"))
 				{
