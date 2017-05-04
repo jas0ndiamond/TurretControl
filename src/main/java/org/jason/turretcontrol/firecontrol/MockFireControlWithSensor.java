@@ -2,6 +2,7 @@ package org.jason.turretcontrol.firecontrol;
 
 import org.jason.turretcontrol.exception.JamOccurredException;
 import org.jason.turretcontrol.exception.SafetyEngagedException;
+import org.jason.turretcontrol.firecontrol.cycle.CycleResult;
 
 public class MockFireControlWithSensor extends FireControl {
 	
@@ -14,8 +15,10 @@ public class MockFireControlWithSensor extends FireControl {
 
 	
 	@Override
-	public synchronized void cycle() throws JamOccurredException, SafetyEngagedException
+	public synchronized CycleResult cycle() throws JamOccurredException, SafetyEngagedException
 	{
+		CycleResult cycleResult = new CycleResult();
+		
 		//safety is primary cycle preventer
 		if(!safety.get())
 		{
@@ -51,10 +54,14 @@ public class MockFireControlWithSensor extends FireControl {
 			//throw new NoAmmoException("Cycle attempted without ammo- reload");
 			throw new SafetyEngagedException("Cycle attempted with safety engaged");
 		}
+		
+		return cycleResult;
 	}
 	
-	public synchronized void jamCycle() throws JamOccurredException, SafetyEngagedException
+	public synchronized CycleResult jamCycle() throws JamOccurredException, SafetyEngagedException
 	{
+		CycleResult cycleResult = new CycleResult();
+		
 		//safety is primary cycle preventer
 		if(!safety.get())
 		{
@@ -73,6 +80,8 @@ public class MockFireControlWithSensor extends FireControl {
 			//throw new NoAmmoException("Cycle attempted without ammo- reload");
 			throw new SafetyEngagedException("Cycle attempted with safety engaged");
 		}
+		
+		return cycleResult;
 	}
 	
 	public void shutdown()
