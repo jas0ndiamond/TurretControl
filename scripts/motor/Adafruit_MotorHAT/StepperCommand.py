@@ -1,5 +1,5 @@
 #import Adafruit_MotorHAT, Adafruit_DCMotor, Adafruit_Stepper
-from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_StepperMotor
+from Adafruit_MotorHAT_Motors import Adafruit_MotorHAT, Adafruit_StepperMotor
 
 import sys
 
