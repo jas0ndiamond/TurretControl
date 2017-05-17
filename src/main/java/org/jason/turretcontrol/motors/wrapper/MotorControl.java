@@ -3,6 +3,7 @@ package org.jason.turretcontrol.motors.wrapper;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.jason.turretcontrol.motors.MotorMotionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,53 +59,6 @@ public class MotorControl {
 		return yPos;
 	}
 	
-	public synchronized void panHome() throws IOException
-	{
-		panXHome();
-		panYHome();
-	}
-	
-	public synchronized void panXHome() throws IOException
-	{
-		panXTo(0);
-	}
-	
-	public synchronized void panYHome() throws IOException
-	{
-		panYTo(0);
-	}
-	
-	public synchronized void panXTo(int x) throws IOException
-	{
-		//determine x position and how to step to x
-		if(xPos > x)
-		{
-			stepMotorX(Math.abs(xPos - x), DIRECTION_BACKWARD);
-		}
-		else if(xPos < x)
-		{
-			stepMotorX(Math.abs(xPos - x), DIRECTION_FORWARD);
-		}
-	}
-	
-	public synchronized void panYTo(int y) throws IOException
-	{
-		if(yPos > y)
-		{
-			stepMotorY(Math.abs(yPos - y), DIRECTION_BACKWARD);
-		}
-		else if(yPos < y)
-		{
-			stepMotorY(Math.abs(yPos - y), DIRECTION_FORWARD);
-		}
-	}
-	
-	public synchronized void panTo(int x, int y) throws IOException
-	{
-		panXTo(x);
-		panYTo(y);
-	}
-	
 	public void addMotor(String name, int port, int speed, int style, int min, int max, int stepsPerRev)
 	{
 		motors.put(name, new StepperMotor(name, port, style, speed, min, max, stepsPerRev) );
@@ -112,8 +66,183 @@ public class MotorControl {
 		logger.info("Added motor " + name + ": " + motors.get(name).toString());
 	}
 	
-	private synchronized void stepMotor(String name, int steps, int direction) throws IOException
+	public MotorMotionResult panHome()
 	{
+		MotorMotionResult result = new MotorMotionResult();
+		
+		result.setX(panXHome().getX());
+		result.setY(panYHome().getY());
+				
+		return result;
+	}
+	
+	public MotorMotionResult panXHome() 
+	{
+		return panXTo(0);
+	}
+	
+	public MotorMotionResult panYHome() 
+	{
+		return panYTo(0);
+	}
+	
+	public MotorMotionResult panXTo(int x) 
+	{
+		MotorMotionResult result;
+		
+		//determine x position and how to step to x
+		int stepCount = Math.abs(xPos - x);
+		if(xPos > x)
+		{
+			result = stepMotorX(stepCount, DIRECTION_BACKWARD);
+		}
+		else if(xPos < x)
+		{
+			result = stepMotorX(stepCount, DIRECTION_FORWARD);
+		}
+		else
+		{
+			//move zero steps
+			result = new MotorMotionResult();
+		}
+		
+		return result;
+	}
+	
+	public MotorMotionResult panYTo(int y)
+	{
+		MotorMotionResult result;
+		
+		if(yPos > y)
+		{
+			result = stepMotorY(Math.abs(yPos - y), DIRECTION_BACKWARD);
+		}
+		else if(yPos < y)
+		{
+			result = stepMotorY(Math.abs(yPos - y), DIRECTION_FORWARD);
+		}
+		else
+		{
+			//move zero steps
+			result = new MotorMotionResult();
+		}
+		
+
+		return result;
+	}
+	
+	public MotorMotionResult panTo(int x, int y) 
+	{
+		MotorMotionResult result = new MotorMotionResult();
+		
+		result.setX(panXTo(x).getX());
+		result.setY(panYTo(y).getY());
+				
+		return result;
+	}
+		
+	public MotorMotionResult stepMotorX(int steps, int direction)
+	{
+		MotorMotionResult result = new MotorMotionResult();
+		
+		if(steps > 0 && directions.containsKey(direction))
+		{
+			int oldXPos = xPos;
+			
+			StepperMotor thisMotor = motors.get(MOTOR_X_NAME);
+			
+			int max = thisMotor.getMax();
+			int min = thisMotor.getMin();
+			
+			if(direction == DIRECTION_FORWARD)
+			{							
+				if(xPos + steps > max)
+				{
+					steps = max - xPos;
+					xPos = max;
+				}
+				else
+				{
+					xPos += steps;
+				}
+			}
+			else if(direction == DIRECTION_BACKWARD)
+			{
+				if(xPos - steps < min)
+				{
+					steps = Math.abs(min) + xPos; 
+					xPos = min;
+				}
+				else
+				{
+					xPos -= steps;
+				}
+			}
+		
+			result.setX(steps, oldXPos, xPos);
+			stepMotor(MOTOR_X_NAME, steps, direction);
+			logger.debug("Motor " + MOTOR_X_NAME + " move result: " + result.toString());
+		}
+		else
+		{
+			logger.warn("Cannot execute panX - invalid step count or direction");
+		}
+		
+		return result;
+	}
+	
+	public MotorMotionResult stepMotorY(int steps, int direction) 
+	{
+		MotorMotionResult result = new MotorMotionResult();
+		
+		if(steps > 0 && directions.containsKey(direction))
+		{
+			int oldYPos = yPos;
+			
+			StepperMotor thisMotor = motors.get(MOTOR_Y_NAME);
+			
+			int max = thisMotor.getMax();
+			int min = thisMotor.getMin();
+			
+			if(direction == DIRECTION_FORWARD)
+			{							
+				if(yPos + steps > max)
+				{
+					steps = max - yPos;
+					yPos = max;
+				}
+				else
+				{
+					yPos += steps;
+				}
+			}
+			else if(direction == DIRECTION_BACKWARD)
+			{
+				if(yPos - steps < min)
+				{
+					steps = Math.abs(min) + yPos; 
+					yPos = min;
+				}
+				else
+				{
+					yPos -= steps;
+				}
+			}
+		
+			result.setY(steps, oldYPos, yPos);
+			stepMotor(MOTOR_Y_NAME, steps, direction);
+			logger.debug("Motor " + MOTOR_Y_NAME + " move result: " + result.toString());
+		}
+		else
+		{
+			logger.warn("Cannot execute stepMotorY - invalid step count or direction");
+		}
+		
+		return result;
+	}
+	
+	private void stepMotor(String name, int steps, int direction)
+	{		
 		if(motors.containsKey(name) && directions.containsKey(direction) )
 		{
 			//StepperCommand s 1 200 f 30 3 3
@@ -148,6 +277,10 @@ public class MotorControl {
 				{
 					logger.error("Motor panning interrupted", e);
 				}
+				catch(IOException e)
+				{
+					logger.error("IOException during pan operation", e);
+				}
 				
 				logger.info("Moving motor " + name + " " + steps + " steps in direction " + direction);
 			}
@@ -162,94 +295,13 @@ public class MotorControl {
 		}
 	}
 	
-	public synchronized void stepMotorX(int steps, int direction) throws IOException
+	public void killMotors()
 	{
-		if(steps > 0 && directions.containsKey(direction))
-		{
-			StepperMotor thisMotor = motors.get(MOTOR_X_NAME);
-			
-			int max = thisMotor.getMax();
-			int min = thisMotor.getMin();
-			
-			if(direction == DIRECTION_FORWARD)
-			{							
-				if(xPos + steps > max)
-				{
-					steps = max - xPos;
-					xPos = max;
-				}
-				else
-				{
-					xPos += steps;
-				}
-			}
-			else if(direction == DIRECTION_BACKWARD)
-			{
-				if(xPos - steps < min)
-				{
-					steps = Math.abs(min) + xPos; 
-					xPos = min;
-				}
-				else
-				{
-					xPos -= steps;
-				}
-			}
+		//killing anywhere other than home will likely cause swinging
+		panHome();
 		
-			stepMotor(MOTOR_X_NAME, steps, direction);
-		}
-		else
-		{
-			logger.warn("Cannot execute panX - invalid step count or direction");
-		}
-	}
-	
-	public synchronized void stepMotorY(int steps, int direction) throws IOException
-	{
-		if(steps > 0 && directions.containsKey(direction))
-		{
-			StepperMotor thisMotor = motors.get(MOTOR_Y_NAME);
-			
-			int max = thisMotor.getMax();
-			int min = thisMotor.getMin();
-			
-			if(direction == DIRECTION_FORWARD)
-			{							
-				if(yPos + steps > max)
-				{
-					steps = max - yPos;
-					yPos = max;
-				}
-				else
-				{
-					yPos += steps;
-				}
-			}
-			else if(direction == DIRECTION_BACKWARD)
-			{
-				if(yPos - steps < min)
-				{
-					steps = Math.abs(min) + yPos; 
-					yPos = min;
-				}
-				else
-				{
-					yPos -= steps;
-				}
-			}
-		
-			stepMotor(MOTOR_Y_NAME, steps, direction);
-		}
-		else
-		{
-			logger.warn("Cannot execute panX - invalid step count or direction");
-		}
-	}
-	
-	public void killMotors() throws IOException
-	{
-		//most cases, x and y are held. kill y and hold x to prevent possible swinging.
-		//kill x when y has had time to stablize
+		//most cases, x and y are held. kill y while holding x to prevent possible swinging.
+		//kill x when y has had time to stabilize
 		
 		killYMotor();
 		try
@@ -265,14 +317,28 @@ public class MotorControl {
 
 	}
 	
-	public void killXMotor() throws IOException
+	public void killXMotor()
 	{
-		Runtime.getRuntime().exec(stepperCommandSyscall + " k " + MOTOR_X_ID);
+		try 
+		{
+			Runtime.getRuntime().exec(stepperCommandSyscall + " k " + MOTOR_X_ID);
+		} 
+		catch (IOException e) 
+		{
+			logger.error("IOException killing motorX", e);
+		}
 	}
 	
-	public void killYMotor() throws IOException
+	public void killYMotor()
 	{
-		Runtime.getRuntime().exec(stepperCommandSyscall + " k " + MOTOR_Y_ID);
+		try 
+		{
+			Runtime.getRuntime().exec(stepperCommandSyscall + " k " + MOTOR_Y_ID);
+		} 
+		catch (IOException e) 
+		{
+			logger.error("IOException killing motorY", e);
+		}
 	}
 	
 	private class StepperMotor
@@ -346,5 +412,30 @@ public class MotorControl {
 				.append(getStepsPerRev())
 				.toString();
 		}
+	}
+	
+	private class MotorPosition
+	{
+		private int x;
+		private int y;
+		
+		public int getX() {
+			return x;
+		}
+		public void setX(int x) {
+			this.x = x;
+		}
+		public int getY() {
+			return y;
+		}
+		public void setY(int y) {
+			this.y = y;
+		}
+		public MotorPosition(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+
+		
 	}
 }
