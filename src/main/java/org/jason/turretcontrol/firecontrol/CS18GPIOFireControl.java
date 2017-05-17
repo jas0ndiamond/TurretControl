@@ -49,6 +49,7 @@ public class CS18GPIOFireControl extends FireControl {
 	private JSONObject config;
 	private long roundLaunchTime;
 	protected long roundDetectTime;
+	private final static int MAX_SHORT_CYCLE_DURATION = 1000;
 	
 	private final static Logger logger = LoggerFactory.getLogger(CS18GPIOFireControl.class); 
 
@@ -60,18 +61,11 @@ public class CS18GPIOFireControl extends FireControl {
 		/*
 		 * Your python code uses the BCM index mode, whose port mappings are listed in the table. 
 		 * In this case, the BCM port 4 maps to GPIO_7 in Pi4j instead of the GPIO_4 you use in your java code.
+		 * 
+		 * gpio readall is helpful here
 		 */
 		
 		this.config = new JSONObject(configString);
-		
-//		triggerPin = 0;
-//		accelPin = 7;
-//		
-//		pirPin = 12;
-//		
-//		triggerDuration = 450;
-//		accelStartDuration = 1000;
-//		accelStopDuration = 250;
 
 		//harvest pins from config in json format, exception for fails
 		triggerPin = config.getInt("trigger_pin"); 
@@ -121,15 +115,21 @@ public class CS18GPIOFireControl extends FireControl {
 					accel.low();
 					Thread.sleep(accelStartDuration);
 					
+					roundLaunchTime = System.currentTimeMillis();
+					
 					//fire, then unfire the blaster
 					trigger.low();
-					roundLaunchTime = System.currentTimeMillis();
 					Thread.sleep(triggerDuration);
 					trigger.high();
 					
 					//stop the flywheels
 					Thread.sleep(accelStopDuration);
-					accel.low();
+					accel.high();
+					
+					cycleResult.setStatus(CycleResult.SUCCESS);
+					cycleResult.setTime(roundLaunchTime);
+					cycleResult.setTriggerDuration(triggerDuration);
+					cycleResult.setAccelDuration(accelStartDuration + accelStopDuration);
 				}
 				catch(InterruptedException e)
 				{
@@ -144,34 +144,38 @@ public class CS18GPIOFireControl extends FireControl {
 					//force the accel relay closed
 					if(accel.isLow())
 					{
+						logger.warn("Forcing accel off");
 						accel.high();
 					}
 					
 					//force the trigger relay closed
 					if(trigger.isLow())
 					{
+						logger.warn("Forcing trigger off");
 						trigger.high();
 					}
 					
 					//confirm round exits barrel, throw jam exception if not
 					//gpio listener created in startup() sets 'roundExited'
 					
-					if(roundExited)
-					{
-						isJammed.set(false);
-						
-						//velo calc
-						//timestamps in ms
-						//distanceToPir in inches
-						//feet per second
-						double roundVelo = (roundDetectTime - roundLaunchTime)/((distanceToPir/12 * 1000));
-						System.out.println("RoundVelo: " + roundVelo);
-					}
-					else
-					{
-						//isJammed.set(true);
-						throw new JamOccurredException("Jam occurred during cycle- clear the jam");
-					}
+//					if(roundExited)
+//					{
+//						isJammed.set(false);
+//						
+//						//velo calc
+//						//timestamps in ms
+//						//distanceToPir in inches
+//						//feet per second
+//						double roundVelo = (roundDetectTime - roundLaunchTime)/((distanceToPir/12 * 1000));
+//						System.out.println("RoundVelo: " + roundVelo);
+//					}
+//					else
+//					{
+//						//isJammed.set(true);
+//						throw new JamOccurredException("Jam occurred during cycle- clear the jam");
+//					}
+					
+					cycleResult.setMessage(CycleResult.SUCCESS);
 				}
 			}
 			else
