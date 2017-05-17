@@ -11,6 +11,8 @@ import org.jason.turretcontrol.demo.DemoRunner;
 import org.jason.turretcontrol.exception.JamOccurredException;
 import org.jason.turretcontrol.exception.NoAmmoException;
 import org.jason.turretcontrol.exception.SafetyEngagedException;
+import org.jason.turretcontrol.motors.MotorMotionResult;
+import org.jason.turretcontrol.sensors.TurretSystem;
 
 public class TurretControlShell 
 {
@@ -73,6 +75,7 @@ public class TurretControlShell
 					//stop thread launched by startDemo, return turret to home
 					if(demo != null)
 					{
+						System.out.println("Demo stopping...");
 						demo.setRunning(false);
 						
 						while(demo.isAlive())
@@ -83,8 +86,11 @@ public class TurretControlShell
 								Thread.sleep(2000); 
 							} catch (InterruptedException e) { e.printStackTrace(); }
 						}
+						
+						System.out.println("Demo stopped");
 					}	
-					
+
+					System.out.println("Shutting down the turret");
 					
 					if(tc != null)
 					{
@@ -99,11 +105,13 @@ public class TurretControlShell
 					System.out.println
 					(
 						"fire\n" + 
-						"moveX val direction\n" +
-						"moveY val direction\n" +
-						"moveZ val direction\n" +
+						//"moveX val direction\n" +
+						//"moveY val direction\n" +
+						//"moveZ val direction\n" +
 						"panX steps direction\n" + 
 						"panY steps direction\n" +
+						"panXTo position\n" + 
+						"panYTo position\n" +
 						"panXhome\n" + 
 						"panYhome\n" +
 						"panHome\n" +
@@ -121,7 +129,7 @@ public class TurretControlShell
 						"reset\n"
 					);
 				}
-				else if(command.equals("fire"))
+				else if(command.equals("fire") || command.equals("cycle"))
 				{
 					try
 					{
@@ -155,7 +163,27 @@ public class TurretControlShell
 				}
 				else if(command.equals("status"))
 				{
-					//
+					System.out.println("SafetyOn: " + tc.getSafety());
+					System.out.println("Ammo: " + tc.getAmmoCount() + "/" + tc.getMagSize() +":" + tc.getCurrentMagazine());
+					
+					System.out.println("Supported Magazines:");
+					for(String mag : tc.getSupportedMagazines())
+					{
+						System.out.println("\t" + mag);
+					}
+					
+					System.out.println("CPU Temp: " + TurretSystem.getCPUTemp() + "C");
+					System.out.println("GPU Temp: " + TurretSystem.getGPUTemp() + "C");
+					
+					double[] loadAvg = TurretSystem.getLoadAverage();
+					System.out.println("Load Avg: " + loadAvg[0] + " " + loadAvg[1] + " " + loadAvg[2] );
+					
+					int[] memUtil = TurretSystem.getMemoryUtilization();
+					System.out.println("Mem: " + memUtil[0] + " " + memUtil[1] + " " + memUtil[2] );
+					
+					long[] jvmMemUtil = TurretSystem.getJVMMemoryUtilization();
+					System.out.println("JVMMem: " + jvmMemUtil[0] + " " + jvmMemUtil[1] + " " + jvmMemUtil[2] );
+
 				}
 				else if(command.equalsIgnoreCase("safetyOn"))
 				{
@@ -171,7 +199,7 @@ public class TurretControlShell
 				{
 					tc.killMotors();
 				}
-				else if(command.startsWith("panX"))
+				else if(command.startsWith("panX "))
 				{
 					cmdArgs = command.split(" ");
 					if(cmdArgs.length == 3)
@@ -179,8 +207,7 @@ public class TurretControlShell
 						int steps = Integer.parseInt(cmdArgs[1]);
 						int direction = Integer.parseInt(cmdArgs[2]);
 						
-						tc.panX(steps, direction);
-						
+						System.out.println("Result: " + tc.panX(steps, direction));
 						System.out.println("Turret position: " + tc.getPositionX() + ", " + tc.getPositionY());
 					}
 					else
@@ -188,7 +215,7 @@ public class TurretControlShell
 						System.out.println("Malformed command");
 					}
 				}
-				else if(command.startsWith("panY"))
+				else if(command.startsWith("panY "))
 				{
 					cmdArgs = command.split(" ");
 					if(cmdArgs.length == 3)
@@ -196,8 +223,53 @@ public class TurretControlShell
 						int steps = Integer.parseInt(cmdArgs[1]);
 						int direction = Integer.parseInt(cmdArgs[2]);
 						
-						tc.panY(steps, direction);
+						System.out.println("Result: " + tc.panY(steps, direction));
+						System.out.println("Turret position: " + tc.getPositionX() + ", " + tc.getPositionY());
+					}
+					else
+					{
+						System.out.println("Malformed command");
+					}
+				}
+				else if(command.startsWith("panXTo"))
+				{
+					cmdArgs = command.split(" ");
+					if(cmdArgs.length == 2)
+					{
+						int position = Integer.parseInt(cmdArgs[1]);
 						
+						System.out.println("Result: " + tc.panXTo(position));						
+						System.out.println("Turret position: " + tc.getPositionX() + ", " + tc.getPositionY());
+					}
+					else
+					{
+						System.out.println("Malformed command");
+					}
+				}
+				else if(command.startsWith("panYTo"))
+				{
+					cmdArgs = command.split(" ");
+					if(cmdArgs.length == 2)
+					{
+						int position = Integer.parseInt(cmdArgs[1]);
+						
+						System.out.println("Result: " + tc.panYTo(position));						
+						System.out.println("Turret position: " + tc.getPositionX() + ", " + tc.getPositionY());
+					}
+					else
+					{
+						System.out.println("Malformed command");
+					}
+				}
+				else if(command.startsWith("panTo"))
+				{
+					cmdArgs = command.split(" ");
+					if(cmdArgs.length == 3)
+					{
+						int x = Integer.parseInt(cmdArgs[1]);
+						int y = Integer.parseInt(cmdArgs[2]);
+						
+						System.out.println("Result: " + tc.panTo(x,y));						
 						System.out.println("Turret position: " + tc.getPositionX() + ", " + tc.getPositionY());
 					}
 					else
@@ -211,19 +283,19 @@ public class TurretControlShell
 				}
 				else if(command.equalsIgnoreCase("resetAmmo"))
 				{
-					//reload current magazine
+					tc.reload(tc.getCurrentMagazine());
 				}
 				else if(command.equalsIgnoreCase("panXhome"))
 				{
-					
+					System.out.println("Result: " +tc.panXHome());
 				}
 				else if(command.equalsIgnoreCase("panYhome"))
 				{
-					
+					System.out.println("Result: " +tc.panYHome());
 				}
 				else if(command.equalsIgnoreCase("panHome"))
 				{
-					
+					System.out.println("Result: " +tc.panHome());
 				}
 				else if(command.equalsIgnoreCase("startDemo") || command.equalsIgnoreCase("demostart"))
 				{
