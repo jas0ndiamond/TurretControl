@@ -14,7 +14,10 @@ import org.jason.turretcontrol.firecontrol.CS18GPIOFireControl;
 import org.jason.turretcontrol.firecontrol.FireControl;
 import org.jason.turretcontrol.firecontrol.G36GPIOFireControl;
 import org.jason.turretcontrol.firecontrol.MockFireControl;
+import org.jason.turretcontrol.firecontrol.cycle.CycleResult;
+import org.jason.turretcontrol.motors.MotorMotionResult;
 import org.jason.turretcontrol.motors.wrapper.MotorControl;
+import org.jason.turretcontrol.sensors.TurretSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +36,7 @@ public class TurretControl
 	private AtomicBoolean chamberFilled;
 	private JSONObject config;
 	
-	private boolean enableTempSensor;
-	private int tempSensorBus;
-	private int tempSensorAddr;
+	private String currentMagazine;
 	
 	private MotorControl motorControl;
 	
@@ -43,6 +44,8 @@ public class TurretControl
 	
 	public TurretControl(String configString) throws Exception
 	{
+		currentMagazine = "NONE";
+		
 		supportedMagazines = new HashMap<>();
 		magSize = 0;
 		ammoCount = new AtomicInteger(DEFAULT_AMMO_COUNT);
@@ -83,7 +86,7 @@ public class TurretControl
         
         ///////////////////////
         //temperature sensor
-        enableTempSensor = false;
+        //enableTempSensor = false;
         
         /*
         //temp sensor
@@ -141,6 +144,10 @@ public class TurretControl
 				motorControl.addMotor(motorName, port, speed, style, min, max, stepsPerRev);
         	}        	
         }
+        else
+        {
+        	throw new Exception("Panning configuration missing");
+        }
         
         /////////////////////////
         //magazine management
@@ -162,12 +169,12 @@ public class TurretControl
         }
 	}
 	
-	public synchronized int getAmmoCount()
+	public int getAmmoCount()
 	{
 		return ammoCount.get();
 	}
 	
-	public synchronized void setAmmoCount(int count)
+	public void setAmmoCount(int count)
 	{
 		if(count >= 0)
 		{
@@ -175,17 +182,27 @@ public class TurretControl
 		}
 	}
 	
-	public synchronized void resetAmmoCount()
+	public void resetAmmoCount()
 	{
 		setAmmoCount(magSize);
 	}
 	
-	public synchronized int getMagSize()
+	public String getCurrentMagazine()
+	{
+		return currentMagazine;
+	}
+	
+	public void setCurrentMagazine(String magName)
+	{
+		currentMagazine = magName;
+	}
+	
+	public int getMagSize()
 	{
 		return magSize;
 	}
 	
-	public synchronized void setMagSize(int size)
+	public void setMagSize(int size)
 	{
 		if(size > 0)
 		{
@@ -193,39 +210,30 @@ public class TurretControl
 		}
 	}
 	
-	public synchronized int getPositionX()
+	public int getPositionX()
 	{
 		return motorControl.getXPos();
 	}
 	
-	public synchronized int getPositionY()
+	public int getPositionY()
 	{
 		return motorControl.getYPos();
 	}
 	
 	public void killMotors() 
 	{
-		if(motorControl != null)
-		{
-			try
-			{
-				motorControl.killMotors();
-			}
-			catch(IOException e)
-			{
-				logger.error("Exception executing killmotors", e);
-			}
-		}
+		motorControl.killMotors();
 	}
 	
-	public synchronized void clearJam()
+	public void clearJam()
 	{
 		chamberFilled.set(false);
 		fc.setIsJammed(false);
 	}
 	
-	public synchronized void fire() throws JamOccurredException, SafetyEngagedException, NoAmmoException
+	public CycleResult fire() throws JamOccurredException, SafetyEngagedException, NoAmmoException
 	{		
+		CycleResult result = null;
 		if
 		(
 			ammoCount.get() > 0
@@ -244,7 +252,7 @@ public class TurretControl
 				//cycle firecontrol
 				//fire control confirms round exit and throws jamexception otherwise
 				
-				fc.cycle();
+				result = fc.cycle();
 				
 				chamberFilled.set(false);
 			}
@@ -262,115 +270,66 @@ public class TurretControl
 		{
 			throw new NoAmmoException("No ammo- reload");
 		}
+		
+		return result;
 	}
 	
-	public synchronized void panX(int steps, int direction)
+	//////////////////////
+	//Panning Operations
+	
+	public MotorMotionResult panX(int steps, int direction)
 	{
-		try
-		{
-			motorControl.stepMotorX(steps, direction);
-		}
-		catch(IOException e)
-		{
-			logger.error("Exception executing panX", e);
-		}
+		return motorControl.stepMotorX(steps, direction);
 	}
 	
-	public synchronized void panY(int steps, int direction)
+	public MotorMotionResult panY(int steps, int direction) 
 	{
-		try
-		{
-			motorControl.stepMotorY(steps, direction);
-		}
-		catch(IOException e)
-		{
-			logger.error("Exception executing panY", e);
-		}	
+		return motorControl.stepMotorY(steps, direction);
 	}
 	
-	public synchronized void panXTo(int pos)
+	public MotorMotionResult panXTo(int pos)
 	{
-		try 
-		{
-			motorControl.panXTo(pos);
-		} 
-		catch (IOException e) 
-		{
-			logger.error("Exception executing panXTo", e);
-		}
+		return motorControl.panXTo(pos);
 	}
 	
-	public synchronized void panYTo(int pos)
+	public MotorMotionResult panYTo(int pos) 
 	{
-		try 
-		{
-			motorControl.panYTo(pos);
-		} 
-		catch (IOException e) 
-		{
-			logger.error("Exception executing panYTo", e);
-		}
+		return motorControl.panYTo(pos);
 	}
 	
-	public synchronized void panTo(int xPos, int yPos)
+	public MotorMotionResult panTo(int xPos, int yPos)
 	{
-		try 
-		{
-			motorControl.panTo(xPos, yPos);
-		} 
-		catch (IOException e) 
-		{
-			logger.error("Exception executing panTo", e);
-		}
+		return motorControl.panTo(xPos, yPos);
 	}
 	
-	public synchronized void panXHome()
+	public MotorMotionResult panXHome() 
 	{
-		try 
-		{
-			motorControl.panXHome();
-		} 
-		catch (IOException e) 
-		{
-			logger.error("Exception executing panXHome", e);
-		}
+		return motorControl.panXHome();
 	}
 	
-	public synchronized void panYHome()
+	public MotorMotionResult panYHome()
 	{
-		try 
-		{
-			motorControl.panYHome();
-		} 
-		catch (IOException e) 
-		{
-			logger.error("Exception executing panYHome", e);
-		}
+		return motorControl.panYHome();
 	}
 	
-	public synchronized void panHome()
+	public MotorMotionResult panHome()
 	{
-		try 
-		{
-			motorControl.panHome();
-		} 
-		catch (IOException e) 
-		{
-			logger.error("Exception executing panHome", e);
-		}
+		return motorControl.panHome();
 	}
+	
+	/////////////////////////////
 	
 	public boolean isChamberFilled()
 	{
 		return chamberFilled.get();
 	}
 	
-	public synchronized boolean getSafety()
+	public boolean getSafety()
 	{
 		return fc.getSafety();
 	}
 	
-	public synchronized void setSafety(boolean state)
+	public void setSafety(boolean state)
 	{
 		fc.setSafety(state);
 	}
@@ -378,36 +337,50 @@ public class TurretControl
 	public void shutdown()
 	{
 		fc.shutdown();
-		
+
 		panHome();
-		
 		killMotors();
+	}
+	
+	public double getCPUTemp() throws InterruptedException, IOException
+	{
+		return TurretSystem.getCPUTemp();
+	}
+	
+	public double getGPUTemp() throws InterruptedException, IOException
+	{
+		return TurretSystem.getGPUTemp();
+	}
+	
+	public double[] getSystemLoadAvg() throws InterruptedException, IOException
+	{
+		return TurretSystem.getLoadAverage();
+	}
+	
+	public int[] getMemoryInfo() throws InterruptedException, IOException
+	{
+		return TurretSystem.getMemoryUtilization();
+	}
+	
+	public long[] getJVMMemoryUtilization()
+	{
+		return TurretSystem.getJVMMemoryUtilization();
 	}
 	
 	public void reset() throws InterruptedException
 	{
 		fc.reset();
 	}
-	
-	public String getState()
-	{
-		String retval = null;
-		
-		if(enableTempSensor)
-		{
-			
-		}
-		
-		return retval ;
-	}
 
-	public synchronized void reload(String magName) 
+	public void reload(String magName) 
 	{
 		Integer magCap = supportedMagazines.get(magName);
 		
 		if(magCap != null)
 		{
 			setAmmoCount(magCap);
+			setMagSize(magCap);
+			setCurrentMagazine(magName);
 		}
 		else
 		{
